@@ -33,14 +33,32 @@ const fetchCoordsByIP = function(ip, callback) {
       callback(Error(msg), null);
     } else {
       const { latitude, longitude } = JSON.parse(data);
-      callback(null, coords);
+      callback(null, { latitude, longitude });
+    }
+    return;
+  });
+};
+
+const fetchISSFlyOverTimes = function(coords, callback) {
+  request(`http://api.open-notify.org/iss-pass.json?lat=${coords.latitude}&lon=${coords.longitude}`, (error, response, data) => {
+    if (error) {
+      callback(error, null);
+    } else if (response.statusCode > 299 || response.statusCode < 200) {
+      const msg = `Status Code ${response.statusCode} when fetching co-ords. Response ${data}`;
+      callback(Error(msg), null);
+    } else {
+      const passes = JSON.parse(data).response;
+      callback(null, passes);
     }
     return;
   });
 };
 
 
+
+
 module.exports = {
   fetchMyIP,
   fetchCoordsByIP,
+  fetchISSFlyOverTimes
 };
